@@ -1,17 +1,12 @@
 # CliWrap
 
-[![Status](https://img.shields.io/badge/status-active-47c219.svg)](https://github.com/Tyrrrz/.github/blob/master/docs/project-status.md)
-[![Made in Ukraine](https://img.shields.io/badge/made_in-ukraine-ffd700.svg?labelColor=0057b7)](https://tyrrrz.me/ukraine)
-[![Build](https://img.shields.io/github/actions/workflow/status/Tyrrrz/CliWrap/main.yml?branch=master)](https://github.com/Tyrrrz/CliWrap/actions)
-[![Coverage](https://img.shields.io/codecov/c/github/Tyrrrz/CliWrap/master)](https://codecov.io/gh/Tyrrrz/CliWrap)
-[![Version](https://img.shields.io/nuget/v/CliWrap.svg)](https://nuget.org/packages/CliWrap)
-[![Downloads](https://img.shields.io/nuget/dt/CliWrap.svg)](https://nuget.org/packages/CliWrap)
-[![Discord](https://img.shields.io/discord/869237470565392384?label=discord)](https://discord.gg/2SUWKFnHSm)
-[![Fuck Russia](https://img.shields.io/badge/fuck-russia-e4181c.svg?labelColor=000000)](https://twitter.com/tyrrrz/status/1495972128977571848)
+### Note: This is my modified version to keep it compatible with .NET 4.6.2 and Playnite 10.
+
+
 
 <table>
     <tr>
-        <td width="99999" align="center">Development of this project is entirely funded by the community. <b><a href="https://tyrrrz.me/donate">Consider donating to support!</a></b></td>
+        <td width="99999" align="center">Development of original project is entirely funded by the community. <b><a href="https://tyrrrz.me/donate">Consider donating to support!</a></b></td>
     </tr>
 </table>
 
@@ -33,7 +28,7 @@ By using this project or its source code, for any purpose and in any shape or fo
 
 To learn more about the war and how you can help, [click here](https://tyrrrz.me/ukraine). Glory to Ukraine! 🇺🇦
 
-## Install
+## Install original
 
 - 📦 [NuGet](https://nuget.org/packages/CliWrap): `dotnet add package CliWrap`
 
