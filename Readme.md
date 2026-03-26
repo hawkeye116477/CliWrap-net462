@@ -847,3 +847,8 @@ var processId = task.ProcessId;
 // Wait for the task to complete
 await task;
 ```
+
+## Etymology
+
+**CliWrap** is made out of "Cli" for "Command-line Interface" and "Wrap" for "wrapper".
+It's pronounced as "klee wrap".
