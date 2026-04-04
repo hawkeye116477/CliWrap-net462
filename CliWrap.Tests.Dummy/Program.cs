@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using CliFx;
+
+[assembly: ExcludeFromCodeCoverage]
 
 namespace CliWrap.Tests.Dummy;
 
