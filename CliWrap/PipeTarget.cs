@@ -253,7 +253,7 @@ public partial class PipeTarget
                 );
 
                 await foreach (
-                    var line in reader.ReadAllLinesAsync(cancellationToken).ConfigureAwait(false)
+                    var line in reader.ReadLinesAsync(cancellationToken).ConfigureAwait(false)
                 )
                 {
                     await handleLineAsync(line, cancellationToken).ConfigureAwait(false);

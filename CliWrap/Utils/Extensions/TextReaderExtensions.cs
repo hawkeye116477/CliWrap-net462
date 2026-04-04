@@ -9,16 +9,12 @@ internal static class TextReaderExtensions
 {
     extension(TextReader reader)
     {
-        public async IAsyncEnumerable<string> ReadAllLinesAsync(
+        public async IAsyncEnumerable<string> ReadLinesAsync(
             [EnumeratorCancellation] CancellationToken cancellationToken = default
         )
         {
-            while (true)
+            while (await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false) is { } line)
             {
-                var line = await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
-                if (line is null)
-                    yield break;
-
                 yield return line;
             }
         }
