@@ -492,7 +492,9 @@ Below you can see some examples of what you can achieve with the help of **CliWr
 - Pipe a string into stdin:
 
 ```csharp
-var cmd = "SELECT * FROM users;" | Cli.Wrap("sqlite3").WithArguments(["myapp.db"]);
+var cmd = "SELECT * FROM users;"
+    | Cli.Wrap("sqlite3").WithArguments(["myapp.db"]);
+
 await cmd.ExecuteAsync();
 ```
 
@@ -501,17 +503,24 @@ await cmd.ExecuteAsync();
 ```csharp
 var stdOutBuffer = new StringBuilder();
 
-var cmd = Cli.Wrap("git").WithArguments(["log", "--oneline"]) | stdOutBuffer;
+var cmd = Cli.Wrap("git").WithArguments(["log", "--oneline"])
+    | stdOutBuffer;
+
 await cmd.ExecuteAsync();
 ```
 
 - Pipe a binary HTTP stream into stdin:
 
 ```csharp
-using var httpClient = new HttpClient();
-await using var input = await httpClient.GetStreamAsync("https://example.com/music.mp3");
+using var http = new HttpClient();
 
-var cmd = input | Cli.Wrap("ffmpeg").WithArguments(["-i", "pipe:0", "output.ogg"]);
+await using var input =
+    await http.GetStreamAsync("https://example.com/music.mp3");
+
+var cmd = input
+    | Cli.Wrap("ffmpeg")
+        .WithArguments(["-i", "pipe:0", "output.ogg"]);
+
 await cmd.ExecuteAsync();
 ```
 
@@ -531,14 +540,18 @@ await cmd.ExecuteAsync();
 await using var stdOut = Console.OpenStandardOutput();
 await using var stdErr = Console.OpenStandardError();
 
-var cmd = Cli.Wrap("docker").WithArguments(["build", "."]) | (stdOut, stdErr);
+var cmd = Cli.Wrap("docker").WithArguments(["build", "."])
+    | (stdOut, stdErr);
+
 await cmd.ExecuteAsync();
 ```
 
 - Pipe stdout into a delegate:
 
 ```csharp
-var cmd = Cli.Wrap("ping").WithArguments(["-c", "4", "example.com"]) | Debug.WriteLine;
+var cmd = Cli.Wrap("ping").WithArguments(["-c", "4", "example.com"])
+    | Debug.WriteLine;
+
 await cmd.ExecuteAsync();
 ```
 
@@ -547,8 +560,11 @@ await cmd.ExecuteAsync();
 ```csharp
 var errorBuffer = new StringBuilder();
 
-var cmd = Cli.Wrap("curl").WithArguments(["-s", "https://api.example.com/data"]) |
-    (PipeTarget.ToFile("response.json"), PipeTarget.ToStringBuilder(errorBuffer));
+var cmd = Cli.Wrap("curl").WithArguments(["-s", "https://api.example.com/data"])
+    | (
+        PipeTarget.ToFile("response.json"),
+        PipeTarget.ToStringBuilder(errorBuffer)
+    );
 
 await cmd.ExecuteAsync();
 ```
@@ -556,10 +572,12 @@ await cmd.ExecuteAsync();
 - Pipe stdout into multiple targets simultaneously:
 
 ```csharp
-var cmd = Cli.Wrap("mysqldump").WithArguments(["-u", "root", "mydb"]) |
-    PipeTarget.Merge(
+var cmd = Cli.Wrap("mysqldump").WithArguments(["-u", "root", "mydb"])
+    | PipeTarget.Merge(
         PipeTarget.ToDelegate(Console.WriteLine),
-        PipeTarget.ToDelegate(line => logger.LogInformation("Dump: {Line}", line)),
+        PipeTarget.ToDelegate(
+            line => logger.LogInformation("Dump: {Line}", line)
+        ),
         PipeTarget.ToFile("backup.sql")
     );
 
@@ -575,10 +593,10 @@ var cmd =
         "name": "Alice",
         "age": 30
     }
-    """ |
-    Cli.Wrap("jq").WithArguments([".name"]) |
-    Cli.Wrap("tee").WithArguments(["formatted.json"]) |
-    (Console.WriteLine, Console.Error.WriteLine);
+    """
+    | Cli.Wrap("jq").WithArguments([".name"])
+    | Cli.Wrap("tee").WithArguments(["formatted.json"])
+    | (Console.WriteLine, Console.Error.WriteLine);
 
 await cmd.ExecuteAsync();
 ```
