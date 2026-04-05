@@ -805,7 +805,7 @@ The underlying process may handle this signal to perform last-minute critical wo
 Graceful cancellation is inherently cooperative, so it's possible that the process may take too long to fulfill the request or choose to ignore it altogether.
 In the above example, this risk is mitigated by additionally scheduling a delayed forceful cancellation that prevents the command from hanging.
 
-If you are executing a command inside a method and don't want to expose signal-related implementation details to the caller, you can rely on the following pattern to use the provided token for graceful cancellation and extend it with a forceful fallback:
+You can also leverage the following pattern if you want to trigger both kinds of cancellations from a single user-provided token:
 
 ```csharp
 public async Task GitPushAsync(CancellationToken cancellationToken = default)
