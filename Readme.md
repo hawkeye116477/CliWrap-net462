@@ -447,10 +447,10 @@ These objects effectively represent no-op stubs that provide empty input and dis
 You can specify your own `PipeSource` and `PipeTarget` instances by calling the corresponding configuration methods on the command:
 
 ```csharp
-await using var input = File.OpenRead("input.txt");
-await using var output = File.Create("output.txt");
+await using var input = File.OpenRead("data.csv");
+await using var output = File.Create("sorted.csv");
 
-await Cli.Wrap("foo")
+await Cli.Wrap("sort")
     .WithStandardInputPipe(PipeSource.FromStream(input))
     .WithStandardOutputPipe(PipeTarget.ToStream(output))
     .ExecuteAsync();
@@ -459,10 +459,10 @@ await Cli.Wrap("foo")
 Alternatively, pipes can also be configured in a slightly terser way using pipe operators:
 
 ```csharp
-await using var input = File.OpenRead("input.txt");
-await using var output = File.Create("output.txt");
+await using var input = File.OpenRead("data.csv");
+await using var output = File.Create("sorted.csv");
 
-await (input | Cli.Wrap("foo") | output).ExecuteAsync();
+await (input | Cli.Wrap("sort") | output).ExecuteAsync();
 ```
 
 Both `PipeSource` and `PipeTarget` have many factory methods that let you create pipe implementations for different scenarios:
@@ -492,7 +492,7 @@ Below you can see some examples of what you can achieve with the help of **CliWr
 - Pipe a string into stdin:
 
 ```csharp
-var cmd = "Hello world" | Cli.Wrap("foo");
+var cmd = "SELECT * FROM users;" | Cli.Wrap("sqlite3").WithArguments(["myapp.db"]);
 await cmd.ExecuteAsync();
 ```
 
@@ -501,7 +501,7 @@ await cmd.ExecuteAsync();
 ```csharp
 var stdOutBuffer = new StringBuilder();
 
-var cmd = Cli.Wrap("foo") | stdOutBuffer;
+var cmd = Cli.Wrap("git").WithArguments(["log", "--oneline"]) | stdOutBuffer;
 await cmd.ExecuteAsync();
 ```
 
@@ -509,16 +509,19 @@ await cmd.ExecuteAsync();
 
 ```csharp
 using var httpClient = new HttpClient();
-await using var input = await httpClient.GetStreamAsync("https://example.com/image.png");
+await using var input = await httpClient.GetStreamAsync("https://example.com/music.mp3");
 
-var cmd = input | Cli.Wrap("foo");
+var cmd = input | Cli.Wrap("ffmpeg").WithArguments(["-i", "pipe:0", "output.ogg"]);
 await cmd.ExecuteAsync();
 ```
 
 - Pipe stdout of one command into stdin of another:
 
 ```csharp
-var cmd = Cli.Wrap("foo") | Cli.Wrap("bar") | Cli.Wrap("baz");
+var cmd = Cli.Wrap("cat").WithArguments(["access.log"])
+    | Cli.Wrap("grep").WithArguments(["ERROR"])
+    | Cli.Wrap("sort");
+
 await cmd.ExecuteAsync();
 ```
 
@@ -528,36 +531,37 @@ await cmd.ExecuteAsync();
 await using var stdOut = Console.OpenStandardOutput();
 await using var stdErr = Console.OpenStandardError();
 
-var cmd = Cli.Wrap("foo") | (stdOut, stdErr);
+var cmd = Cli.Wrap("docker").WithArguments(["build", "."]) | (stdOut, stdErr);
 await cmd.ExecuteAsync();
 ```
 
 - Pipe stdout into a delegate:
 
 ```csharp
-var cmd = Cli.Wrap("foo") | Debug.WriteLine;
+var cmd = Cli.Wrap("ping").WithArguments(["-c", "4", "example.com"]) | Debug.WriteLine;
 await cmd.ExecuteAsync();
 ```
 
 - Pipe stdout into a file and stderr into a `StringBuilder`:
 
 ```csharp
-var buffer = new StringBuilder();
+var errorBuffer = new StringBuilder();
 
-var cmd = Cli.Wrap("foo") |
-    (PipeTarget.ToFile("output.txt"), PipeTarget.ToStringBuilder(buffer));
+var cmd = Cli.Wrap("curl").WithArguments(["-s", "https://api.example.com/data"]) |
+    (PipeTarget.ToFile("response.json"), PipeTarget.ToStringBuilder(errorBuffer));
 
 await cmd.ExecuteAsync();
 ```
 
-- Pipe stdout into multiple files simultaneously:
+- Pipe stdout into multiple targets simultaneously:
 
 ```csharp
-var cmd = Cli.Wrap("foo") | PipeTarget.Merge(
-    PipeTarget.ToFile("file1.txt"),
-    PipeTarget.ToFile("file2.txt"),
-    PipeTarget.ToFile("file3.txt")
-);
+var cmd = Cli.Wrap("mysqldump").WithArguments(["-u", "root", "mydb"]) |
+    PipeTarget.Merge(
+        PipeTarget.ToDelegate(Console.WriteLine),
+        PipeTarget.ToDelegate(line => logger.LogInformation("Dump: {Line}", line)),
+        PipeTarget.ToFile("backup.sql")
+    );
 
 await cmd.ExecuteAsync();
 ```
@@ -566,9 +570,14 @@ await cmd.ExecuteAsync();
 
 ```csharp
 var cmd =
-    "Hello world" |
-    Cli.Wrap("foo").WithArguments(["aaa"]) |
-    Cli.Wrap("bar").WithArguments(["bbb"]) |
+    """
+    {
+        "name": "Alice",
+        "age": 30
+    }
+    """ |
+    Cli.Wrap("jq").WithArguments([".name"]) |
+    Cli.Wrap("tee").WithArguments(["formatted.json"]) |
     (Console.WriteLine, Console.Error.WriteLine);
 
 await cmd.ExecuteAsync();
@@ -590,8 +599,8 @@ In order to execute a command with buffering, call the `ExecuteBufferedAsync()` 
 using CliWrap;
 using CliWrap.Buffered;
 
-var result = await Cli.Wrap("foo")
-    .WithArguments(["bar"])
+var result = await Cli.Wrap("python")
+    .WithArguments(["script.py"])
     .ExecuteBufferedAsync();
 
 // Result contains:
@@ -608,16 +617,16 @@ The result object returned by this execution model also has a few convenience sh
 For example, you can use the tuple deconstruction syntax to extract the exit code, standard output, and standard error — all within a single statement:
 
 ```csharp
-var (exitCode, stdOut, stdErr) = await Cli.Wrap("foo")
-    .WithArguments(["bar"])
+var (exitCode, stdOut, stdErr) = await Cli.Wrap("python")
+    .WithArguments(["script.py"])
     .ExecuteBufferedAsync();
 ```
 
 If you are only interested in the standard output part of the result, you can streamline the code even further by using the provided implicit conversion:
 
 ```csharp
-string stdOut = await Cli.Wrap("foo")
-    .WithArguments(["bar"])
+string stdOut = await Cli.Wrap("python")
+    .WithArguments(["script.py"])
     .ExecuteBufferedAsync();
 ```
 
@@ -626,13 +635,13 @@ To override this, specify the encoding explicitly by using one of the available 
 
 ```csharp
 // Treat both stdout and stderr as UTF8-encoded text streams
-var result = await Cli.Wrap("foo")
-    .WithArguments(["bar"])
+var result = await Cli.Wrap("python")
+    .WithArguments(["script.py"])
     .ExecuteBufferedAsync(Encoding.UTF8);
 
 // Treat stdout as ASCII-encoded and stderr as UTF8-encoded
-var result = await Cli.Wrap("foo")
-    .WithArguments(["bar"])
+var result = await Cli.Wrap("python")
+    .WithArguments(["script.py"])
     .ExecuteBufferedAsync(Encoding.ASCII, Encoding.UTF8);
 ```
 
@@ -657,7 +666,7 @@ To execute a command as a _pull-based_ event stream, use the `ListenAsync()` ext
 using CliWrap;
 using CliWrap.EventStream;
 
-var cmd = Cli.Wrap("foo").WithArguments(["bar"]);
+var cmd = Cli.Wrap("dotnet").WithArguments(["build"]);
 
 await foreach (var cmdEvent in cmd.ListenAsync())
 {
@@ -694,7 +703,7 @@ using System.Reactive;
 using CliWrap;
 using CliWrap.EventStream;
 
-var cmd = Cli.Wrap("foo").WithArguments(["bar"]);
+var cmd = Cli.Wrap("dotnet").WithArguments(["build"]);
 
 await cmd.Observe().ForEachAsync(cmdEvent =>
 {
@@ -732,10 +741,8 @@ When running a command using one of the built-in execution models, existing pipe
 This means that you can, for example, pipe a command to a file and simultaneously execute it as an event stream:
 
 ```csharp
-var cmd =
-    PipeSource.FromFile("input.txt") |
-    Cli.Wrap("foo") |
-    PipeTarget.ToFile("output.txt");
+var cmd = Cli.Wrap("dotnet").WithArguments(["test"]) |
+    PipeTarget.ToFile("test-output.log");
 
 // Iterate as an event stream and pipe to a file at the same time
 // (execution models preserve configured pipes)
@@ -761,7 +768,9 @@ using var cts = new CancellationTokenSource();
 // Cancel after a timeout of 10 seconds
 cts.CancelAfter(TimeSpan.FromSeconds(10));
 
-var result = await Cli.Wrap("foo").ExecuteAsync(cts.Token);
+var result = await Cli.Wrap("ffmpeg")
+    .WithArguments(["-i", "input.mp4", "output.webm"])
+    .ExecuteAsync(cts.Token);
 ```
 
 In the event of a cancellation request, the underlying process will be killed and `ExecuteAsync()` will throw an exception of type `OperationCanceledException` (or its derivative, `TaskCanceledException`).
@@ -770,7 +779,9 @@ You will need to catch this exception in your code to recover from cancellation:
 ```csharp
 try
 {
-    await Cli.Wrap("foo").ExecuteAsync(cts.Token);
+    await Cli.Wrap("ffmpeg")
+        .WithArguments(["-i", "input.mp4", "output.webm"])
+        .ExecuteAsync(cts.Token);
 }
 catch (OperationCanceledException)
 {
@@ -796,7 +807,9 @@ forcefulCts.CancelAfter(TimeSpan.FromSeconds(10));
 // 3 seconds later (as configured above).
 gracefulCts.CancelAfter(TimeSpan.FromSeconds(7));
 
-var result = await Cli.Wrap("foo").ExecuteAsync(forcefulCts.Token, gracefulCts.Token);
+var result = await Cli.Wrap("ffmpeg")
+    .WithArguments(["-i", "input.mp4", "output.webm"])
+    .ExecuteAsync(forcefulCts.Token, gracefulCts.Token);
 ```
 
 Requesting graceful cancellation in **CliWrap** is functionally equivalent to pressing `Ctrl+C` in the console window.
@@ -837,8 +850,8 @@ This is a specialized awaitable object that contains additional information abou
 Currently, this object includes only one extra property, `ProcessId`, which exposes the ID of the underlying process:
 
 ```csharp
-var task = Cli.Wrap("foo")
-    .WithArguments(["bar"])
+var task = Cli.Wrap("ffmpeg")
+    .WithArguments(["-i", "input.mp4", "output.webm"])
     .ExecuteAsync();
 
 // Get the process ID
