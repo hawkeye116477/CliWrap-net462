@@ -190,7 +190,6 @@ public class PipingSpecs
                 .WithArguments(["generate binary", "--length", "100000"])
             | PipeTarget.Create(
                 async (origin, cancellationToken) =>
-                    // ReSharper disable once AccessToDisposedClosure
                     await origin.CopyToAsync(stream, cancellationToken)
             );
 
@@ -210,10 +209,7 @@ public class PipingSpecs
         var cmd =
             Cli.Wrap(Dummy.Program.FilePath)
                 .WithArguments(["generate binary", "--length", "100000"])
-            | PipeTarget.Create(origin =>
-                // ReSharper disable once AccessToDisposedClosure
-                origin.CopyTo(stream)
-            );
+            | PipeTarget.Create(origin => origin.CopyTo(stream));
 
         // Act
         await cmd.ExecuteAsync();
@@ -699,8 +695,6 @@ public class PipingSpecs
                         random.NextBytes(buffer);
                         await destination.WriteAsync(buffer, cancellationToken);
                     }
-
-                    // ReSharper disable once FunctionNeverReturns
                 }
             )
             | Cli.Wrap(Dummy.Program.FilePath).WithArguments(["echo stdin", "--length", "100000"]);
