@@ -1,4 +1,4 @@
-﻿namespace CliWrap.Utils;
+namespace CliWrap.Utils;
 
 internal static class BufferSizes
 {

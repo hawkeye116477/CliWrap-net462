@@ -1,4 +1,4 @@
-﻿# CliWrap.Benchmarks
+# CliWrap.Benchmarks
 
 All benchmarks below were ran with the following configuration:
 

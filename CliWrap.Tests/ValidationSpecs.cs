@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using CliWrap.Buffered;
 using CliWrap.Exceptions;
 using FluentAssertions;

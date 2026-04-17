@@ -1,4 +1,4 @@
-﻿namespace CliWrap;
+namespace CliWrap;
 
 // The only reason this entry point exists is because it looks cool to have
 // an expression that matches the library name -- Cli.Wrap().
