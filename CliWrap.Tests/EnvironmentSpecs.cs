@@ -25,7 +25,13 @@ public class EnvironmentSpecs
         var result = await cmd.ExecuteBufferedAsync();
 
         // Assert
-        result.StandardOutput.Trim().Should().Be(dir.Path);
+        // On macOS, /var is a symlink to /private/var, so Directory.GetCurrentDirectory()
+        // in the child process returns a /private/-prefixed path. Strip it to normalize.
+        var actualPath = result.StandardOutput.Trim();
+        if (actualPath.StartsWith("/private/", StringComparison.Ordinal))
+            actualPath = actualPath["/private".Length..];
+
+        actualPath.Should().Be(dir.Path);
     }
 
     [Fact(Timeout = 15000)]
