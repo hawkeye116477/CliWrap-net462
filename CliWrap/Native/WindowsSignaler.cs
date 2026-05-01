@@ -34,7 +34,7 @@ internal partial class WindowsSignaler(string filePath) : IDisposable
         if (!process.Start())
             return false;
 
-        if (!process.WaitForExit(30_000))
+        if (!process.WaitForExit(TimeSpan.FromSeconds(30)))
             return false;
 
         return process.ExitCode == 0;

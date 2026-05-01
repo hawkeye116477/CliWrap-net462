@@ -492,7 +492,7 @@ public class PipingSpecs
         // Arrange
         var cmd =
             Cli.Wrap(Dummy.Program.FilePath)
-                .WithArguments(["generate binary", "--length", "100_000"])
+                .WithArguments(["generate binary", "--length", "100000"])
             | PipeTarget.Merge(
                 PipeTarget.ToStream(Stream.Null),
                 PipeTarget.ToDelegate(_ => throw new Exception("Expected exception."))
@@ -646,7 +646,7 @@ public class PipingSpecs
         // Arrange
         var cmd =
             Cli.Wrap(Dummy.Program.FilePath)
-                .WithArguments(["generate binary", "--length", "100_000"])
+                .WithArguments(["generate binary", "--length", "100000"])
             | PipeTarget.ToFile("non-existing-directory/file.txt");
 
         // Act
