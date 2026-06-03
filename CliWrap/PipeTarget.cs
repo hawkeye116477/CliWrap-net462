@@ -198,7 +198,7 @@ public partial class PipeTarget
                 );
 
                 await using (file.ToAsyncDisposable())
-                    await origin.CopyToAsync(file, true, cancellationToken).ConfigureAwait(false);
+                    await origin.CopyToAsync(file, cancellationToken).ConfigureAwait(false);
             }
         );
 

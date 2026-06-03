@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CliWrap.Utils;
 using PowerKit.Extensions;
 
 namespace CliWrap;
@@ -93,9 +94,17 @@ public partial class PipeSource
         Create(
             async (destination, cancellationToken) =>
             {
-                var source = File.OpenRead(filePath);
-                await using (source.ToAsyncDisposable())
-                    await source.CopyToAsync(destination, cancellationToken).ConfigureAwait(false);
+                var file = new FileStream(
+                    filePath,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.Read,
+                    BufferSizes.Stream,
+                    FileOptions.Asynchronous | FileOptions.SequentialScan
+                );
+
+                await using (file.ToAsyncDisposable())
+                    await file.CopyToAsync(destination, cancellationToken).ConfigureAwait(false);
             }
         );
 
