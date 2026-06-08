@@ -3,94 +3,93 @@
 All benchmarks below were ran with the following configuration:
 
 ```ini
-BenchmarkDotNet=v0.13.1, OS=Windows 10.0.19043.1466 (21H1/May2021Update)
-11th Gen Intel Core i5-11600K 3.90GHz, 1 CPU, 12 logical and 6 physical cores
-.NET SDK=6.0.100
-         [Host]     : .NET 6.0.0 (6.0.21.52210), X64 RyuJIT
-         DefaultJob : .NET 6.0.0 (6.0.21.52210), X64 RyuJIT
+BenchmarkDotNet v0.15.8, Linux Arch Linux
+AMD Ryzen 5 7530U with Radeon Graphics 3.76GHz, 1 CPU, 12 logical and 6 physical cores
+.NET SDK 10.0.201
+  [Host]     : .NET 10.0.5 (10.0.5, 10.0.526.15411), X64 RyuJIT x86-64-v3
+  DefaultJob : .NET 10.0.5 (10.0.5, 10.0.526.15411), X64 RyuJIT x86-64-v3
 ```
 
 ## Basic benchmarks
 
-**Description**: run a process, wait for completion, and return the exit code.
+Run a process, wait for completion, and return the exit code.
 
 ```ini
-|           Method |     Mean |    Error |   StdDev | Ratio | Allocated |
-|----------------- |---------:|---------:|---------:|------:|----------:|
-| RunProcessAsTask | 53.71 ms | 0.221 ms | 0.196 ms |  0.84 |    112 KB |
-|          Sheller | 60.51 ms | 0.244 ms | 0.229 ms |  0.95 |    125 KB |
-|   MedallionShell | 63.53 ms | 0.236 ms | 0.209 ms |  0.99 |    118 KB |
-|          CliWrap | 64.03 ms | 0.399 ms | 0.373 ms |  1.00 |     93 KB |
+| Method           | Mean     | Error    | StdDev   | Ratio | RatioSD | Allocated | Alloc Ratio |
+|----------------- |---------:|---------:|---------:|------:|--------:|----------:|------------:|
+| CliWrap          | 48.64 ms | 0.876 ms | 0.777 ms |  1.00 |    0.02 |  64.34 KB |        1.00 |
+| MedallionShell   | 48.66 ms | 0.955 ms | 0.938 ms |  1.00 |    0.02 |   77.9 KB |        1.21 |
+| RunProcessAsTask | 48.82 ms | 0.947 ms | 1.013 ms |  1.00 |    0.03 |  69.56 KB |        1.08 |
 ```
 
 ## Buffering benchmarks
 
-**Description**: run a process, read standard output and error, wait for completion, and return buffered output and error data.
+Run a process, read standard output and error, wait for completion, and return buffered output and error data.
 Target program writes a total of 1 million characters to each stream.
 
 ```ini
-|           Method |     Mean |    Error |   StdDev | Ratio |     Gen 0 |    Gen 1 |    Gen 2 | Allocated |
-|----------------- |---------:|---------:|---------:|------:|----------:|---------:|---------:|----------:|
-| RunProcessAsTask | 73.43 ms | 0.439 ms | 0.389 ms |  0.88 |  714.2857 | 428.5714 | 285.7143 |      4 MB |
-|          Sheller | 79.70 ms | 0.231 ms | 0.216 ms |  0.96 |  857.1429 | 428.5714 | 142.8571 |      6 MB |
-|         ProcessX | 83.12 ms | 0.473 ms | 0.442 ms |  1.00 |  714.2857 | 428.5714 | 285.7143 |      5 MB |
-|          CliWrap | 83.20 ms | 0.382 ms | 0.339 ms |  1.00 |  571.4286 | 428.5714 | 142.8571 |      5 MB |
-|   MedallionShell | 84.75 ms | 0.325 ms | 0.288 ms |  1.02 | 1000.0000 | 833.3333 | 666.6667 |      6 MB |
+| Method           | Mean    | Error    | StdDev   | Ratio | RatioSD | Gen0       | Gen1       | Gen2      | Allocated | Alloc Ratio |
+|----------------- |--------:|---------:|---------:|------:|--------:|-----------:|-----------:|----------:|----------:|------------:|
+| ProcessX         | 1.397 s | 0.0277 s | 0.0406 s |  0.95 |    0.03 |  3000.0000 |  3000.0000 | 3000.0000 | 382.81 MB |        0.96 |
+| RunProcessAsTask | 1.444 s | 0.0289 s | 0.0270 s |  0.98 |    0.02 |  3000.0000 |  3000.0000 | 3000.0000 | 382.73 MB |        0.96 |
+| CliWrap          | 1.472 s | 0.0262 s | 0.0245 s |  1.00 |    0.02 | 34000.0000 | 22000.0000 | 3000.0000 | 397.78 MB |        1.00 |
+| MedallionShell   | 1.649 s | 0.0328 s | 0.0391 s |  1.12 |    0.03 | 33000.0000 | 30000.0000 | 7000.0000 | 661.07 MB |        1.66 |
+
 ```
 
 ## Async event stream benchmarks
 
-**Description**: run a process as a pull-based event stream and return the number of lines written to each stream.
+Run a process as a pull-based event stream and return the number of lines written to each stream.
 Target program writes a total of 1 million characters to each stream.
 
 ```ini
-|   Method |     Mean |    Error |   StdDev | Ratio |    Gen 0 | Allocated |
-|--------- |---------:|---------:|---------:|------:|---------:|----------:|
-| ProcessX | 83.53 ms | 0.621 ms | 0.550 ms |  0.99 | 333.3333 |      3 MB |
-|  CliWrap | 84.47 ms | 1.212 ms | 1.075 ms |  1.00 | 500.0000 |      3 MB |
+| Method   | Mean    | Error    | StdDev   | Ratio | RatioSD | Gen0       | Gen1       | Gen2       | Allocated | Alloc Ratio |
+|--------- |--------:|---------:|---------:|------:|--------:|-----------:|-----------:|-----------:|----------:|------------:|
+| ProcessX | 1.327 s | 0.0251 s | 0.0258 s |  0.97 |    0.03 | 62000.0000 | 62000.0000 | 62000.0000 | 192.05 MB |        0.93 |
+| CliWrap  | 1.370 s | 0.0268 s | 0.0338 s |  1.00 |    0.03 | 51000.0000 | 49000.0000 | 49000.0000 | 205.53 MB |        1.00 |
 ```
 
 ## Observable event stream benchmarks
 
-**Description**: run a process as a push-based event stream and return the number of lines written to each stream.
+Run a process as a push-based event stream and return the number of lines written to each stream.
 Target program writes a total of 1 million characters to each stream.
 
 ```ini
-|  Method |     Mean |    Error |   StdDev | Ratio |    Gen 0 | Allocated |
-|-------- |---------:|---------:|---------:|------:|---------:|----------:|
-| CliWrap | 81.94 ms | 0.414 ms | 0.346 ms |  1.00 | 428.5714 |      3 MB |
+| Method  | Mean    | Error    | StdDev   | Ratio | RatioSD | Gen0       | Gen1       | Gen2       | Allocated | Alloc Ratio |
+|-------- |--------:|---------:|---------:|------:|--------:|-----------:|-----------:|-----------:|----------:|------------:|
+| CliWrap | 1.366 s | 0.0268 s | 0.0286 s |  1.00 |    0.03 | 46000.0000 | 44000.0000 | 44000.0000 | 206.67 MB |        1.00 |
 ```
 
 ## Pipe from stream benchmarks
 
-**Description**: run a process and pipe a stream into standard input. 
+Run a process and pipe a stream into standard input.
 
 ```ini
-|         Method |     Mean |    Error |   StdDev | Ratio | RatioSD | Allocated |
-|--------------- |---------:|---------:|---------:|------:|--------:|----------:|
-|        CliWrap | 64.70 ms | 0.470 ms | 0.440 ms |  1.00 |    0.00 |     93 KB |
-| MedallionShell | 64.85 ms | 0.909 ms | 0.806 ms |  1.00 |    0.02 |    168 KB |
+| Method         | Mean     | Error    | StdDev   | Median   | Ratio | RatioSD | Allocated | Alloc Ratio |
+|--------------- |---------:|---------:|---------:|---------:|------:|--------:|----------:|------------:|
+| CliWrap        | 57.02 ms | 1.121 ms | 1.049 ms | 57.10 ms |  1.00 |    0.03 |  66.01 KB |        1.00 |
+| MedallionShell | 57.64 ms | 1.148 ms | 2.794 ms | 56.62 ms |  1.01 |    0.05 |  84.46 KB |        1.28 |
 ```
 
 ## Pipe to stream benchmarks
 
-**Description**: run a process and pipe the standard output into a memory stream.
+Run a process and pipe the standard output into a memory stream.
 Target program writes a total of 1 million bytes to each stream.
 
 ```ini
-|         Method |     Mean |    Error |   StdDev | Ratio |    Gen 0 |    Gen 1 |    Gen 2 | Allocated |
-|--------------- |---------:|---------:|---------:|------:|---------:|---------:|---------:|----------:|
-|        CliWrap | 75.52 ms | 0.541 ms | 0.480 ms |  1.00 | 142.8571 | 142.8571 | 142.8571 |      2 MB |
-| MedallionShell | 76.56 ms | 0.396 ms | 0.351 ms |  1.01 | 142.8571 | 142.8571 | 142.8571 |      3 MB |
+| Method         | Mean     | Error    | StdDev   | Ratio | RatioSD | Allocated | Alloc Ratio |
+|--------------- |---------:|---------:|---------:|------:|--------:|----------:|------------:|
+| CliWrap        | 55.62 ms | 0.874 ms | 0.818 ms |  1.00 |    0.02 |  344.9 KB |        1.00 |
+| MedallionShell | 55.88 ms | 0.576 ms | 0.511 ms |  1.00 |    0.02 | 440.01 KB |        1.28 |
 ```
 
-**Pipe to multiple streams**
+## Pipe to multiple streams benchmarks
 
-**Description**: run a process and pipe the standard output into two memory streams.
+Run a process and pipe the standard output into two memory streams.
 Target program writes a total of 1 million bytes to each stream.
 
 ```ini
-|  Method |     Mean |    Error |   StdDev | Ratio |    Gen 0 |    Gen 1 |    Gen 2 | Allocated |
-|-------- |---------:|---------:|---------:|------:|---------:|---------:|---------:|----------:|
-| CliWrap | 77.29 ms | 0.515 ms | 0.456 ms |  1.00 | 714.2857 | 571.4286 | 571.4286 |      5 MB |
+| Method  | Mean     | Error    | StdDev   | Ratio | RatioSD | Allocated | Alloc Ratio |
+|-------- |---------:|---------:|---------:|------:|--------:|----------:|------------:|
+| CliWrap | 55.79 ms | 1.075 ms | 1.006 ms |  1.00 |    0.02 | 717.49 KB |        1.00 |
 ```

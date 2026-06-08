@@ -8,9 +8,6 @@ namespace CliWrap.Benchmarks;
 [MemoryDiagnoser, Orderer(SummaryOrderPolicy.FastestToSlowest)]
 public class PipeToMultipleStreamsBenchmark
 {
-    private const string FilePath = "dotnet";
-    private static readonly string Args = $"{Tests.Dummy.Program.FilePath} generate binary";
-
     [Benchmark(Baseline = true)]
     public async Task<(Stream, Stream)> CliWrap()
     {
@@ -19,7 +16,9 @@ public class PipeToMultipleStreamsBenchmark
 
         var target = PipeTarget.Merge(PipeTarget.ToStream(stream1), PipeTarget.ToStream(stream2));
 
-        var command = Cli.Wrap(FilePath).WithArguments(Args) | target;
+        var command =
+            Cli.Wrap(Tests.Dummy.Program.FilePath).WithArguments(["generate", "binary"]) | target;
+
         await command.ExecuteAsync();
 
         return (stream1, stream2);

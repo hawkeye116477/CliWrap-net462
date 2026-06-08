@@ -8,16 +8,16 @@ namespace CliWrap.Benchmarks;
 [MemoryDiagnoser, Orderer(SummaryOrderPolicy.FastestToSlowest)]
 public class PullEventStreamBenchmarks
 {
-    private const string FilePath = "dotnet";
-    private static readonly string Args =
-        $"{Tests.Dummy.Program.FilePath} generate text --lines 1000";
-
     [Benchmark(Baseline = true)]
     public async Task<int> CliWrap()
     {
         var counter = 0;
 
-        await foreach (var cmdEvent in Cli.Wrap(FilePath).WithArguments(Args).ListenAsync())
+        await foreach (
+            var cmdEvent in Cli.Wrap(Tests.Dummy.Program.FilePath)
+                .WithArguments(["generate", "text", "--lines", "1000"])
+                .ListenAsync()
+        )
         {
             switch (cmdEvent)
             {
@@ -39,8 +39,8 @@ public class PullEventStreamBenchmarks
         var counter = 0;
 
         var (_, stdOutStream, stdErrStream) = Cysharp.Diagnostics.ProcessX.GetDualAsyncEnumerable(
-            FilePath,
-            arguments: Args
+            Tests.Dummy.Program.FilePath,
+            arguments: "generate text --lines 1000"
         );
 
         var consumeStdOutTask = Task.Run(async () =>

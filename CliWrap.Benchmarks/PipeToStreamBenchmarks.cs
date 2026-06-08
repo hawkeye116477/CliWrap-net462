@@ -8,15 +8,14 @@ namespace CliWrap.Benchmarks;
 [MemoryDiagnoser, Orderer(SummaryOrderPolicy.FastestToSlowest)]
 public class PipeToStreamBenchmarks
 {
-    private const string FilePath = "dotnet";
-    private static readonly string Args = $"{Tests.Dummy.Program.FilePath} generate binary";
-
     [Benchmark(Baseline = true)]
     public async Task<Stream> CliWrap()
     {
         await using var stream = new MemoryStream();
 
-        var command = Cli.Wrap(FilePath).WithArguments(Args) | stream;
+        var command =
+            Cli.Wrap(Tests.Dummy.Program.FilePath).WithArguments(["generate", "binary"]) | stream;
+
         await command.ExecuteAsync();
 
         return stream;
@@ -27,7 +26,10 @@ public class PipeToStreamBenchmarks
     {
         await using var stream = new MemoryStream();
 
-        var command = Medallion.Shell.Command.Run(FilePath, Args.Split(' ')) > stream;
+        var command =
+            Medallion.Shell.Command.Run(Tests.Dummy.Program.FilePath, ["generate", "binary"])
+            > stream;
+
         await command.Task;
 
         return stream;
