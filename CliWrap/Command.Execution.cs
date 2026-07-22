@@ -7,8 +7,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CliWrap.Exceptions;
-using CliWrap.Utils;
 using CliWrap.PowerKit.Extensions;
+using CliWrap.Utils;
+using CliWrap.Utils.Extensions;
 
 namespace CliWrap;
 
@@ -144,10 +145,11 @@ public partial class Command
     {
         await using (process.StandardInput.ToAsyncDisposable())
         {
+            var copyTask = StandardInputPipe.CopyToAsync(process.StandardInput, cancellationToken);
+
             try
             {
-                await StandardInputPipe
-                    .CopyToAsync(process.StandardInput, cancellationToken)
+                await copyTask
                     // The input pipe may never respond to cancellation, so we add a fallback
                     // that drops the task and returns early when cancellation is requested.
                     // This prevents hanging when the process exits before consuming all stdin data.
@@ -159,13 +161,25 @@ public partial class Command
                     .WaitAsync(cancellationToken)
                     .ConfigureAwait(false);
             }
-            // Expect IOException: "The pipe has been ended" (Windows) or "Broken pipe" (Unix).
-            // This may happen if the process terminated before the pipe has been exhausted.
-            // It's not an exceptional situation because the process may not need the entire
-            // stdin to complete successfully.
-            // Don't catch derived exceptions, such as FileNotFoundException, to avoid false positives.
-            // We also can't rely on process.HasExited here because of potential race conditions.
-            catch (IOException ex) when (ex.GetType() == typeof(IOException)) { }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                // We tried to cancel the copy task and abandoned it. If it did not respond to
+                // cancellation, it will remain in a detached state, so we need to observe its
+                // exception so it doesn't get reported to the finalizer thread and crash the process.
+                _ = copyTask.ObserveException();
+
+                throw;
+            }
+            catch (IOException ex)
+                // Don't catch derived exceptions, such as FileNotFoundException, to avoid false positives.
+                // We also can't rely on process.HasExited here because of potential race conditions.
+                when (ex.GetType() == typeof(IOException))
+            {
+                // Expect IOException: "The pipe has been ended" (Windows) or "Broken pipe" (Unix).
+                // This may happen if the process terminated before the pipe has been exhausted.
+                // It's not an exceptional situation because the process may not need the entire
+                // stdin to complete successfully.
+            }
         }
     }
 
@@ -250,29 +264,34 @@ public partial class Command
         catch (OperationCanceledException ex) when (ex.CancellationToken == waitTimeoutCts.Token)
         {
             // We tried to kill the process, but it didn't exit within the allotted timeout, meaning
-            // that the termination attempt failed. This should never happen, but inform the user if it does.
+            // that the termination attempt failed. This should never happen, but it's not impossible.
             throw new TimeoutException(
                 $"Failed to terminate the underlying process ({process.Name}#{process.Id}) within the allotted timeout.",
                 ex
             );
         }
+        catch (OperationCanceledException)
+            // Not checking ex.CancellationToken here because it will always be stdInCts.Token
+            // at this point due to the link.
+            when (forcefulCancellationToken.IsCancellationRequested)
+        {
+            // The operation was cancelled forcefully by the user. Suppress this exception as we'll throw
+            // a more meaningful one later.
+        }
+        catch (OperationCanceledException)
+            // Not checking ex.CancellationToken here because it will always be stdInCts.Token
+            // at this point due to the link.
+            when (gracefulCancellationToken.IsCancellationRequested)
+        {
+            // The operation was cancelled gracefully by the user. Suppress this exception as we'll throw
+            // a more meaningful one later.
+        }
         catch (OperationCanceledException ex) when (ex.CancellationToken == stdInCts.Token)
         {
-            // This clause will be hit both when stdin piping is canceled due to process exit
-            // and when it aborts due to an actual cancellation request (because of the link).
-            // Swallow this exception because it was triggered by an internal cancellation,
-            // we will throw a more meaningful one later if needed.
-        }
-        catch (OperationCanceledException ex)
-            when (ex.CancellationToken == forcefulCancellationToken
-                || ex.CancellationToken == gracefulCancellationToken
-            )
-        {
-            // This clause should never hit due to the registrations above, but just in case it does,
-            // swallow the exception here to throw a more meaningful one later.
+            // The process exited before consuming all stdin, ignore this internal cancellation
         }
 
-        // Check if the process exited after forceful cancellation
+        // Handle forceful cancellation
         if (forcefulCancellationToken.IsCancellationRequested)
         {
             throw new OperationCanceledException(
@@ -282,7 +301,7 @@ public partial class Command
             );
         }
 
-        // Check if the process exited after graceful cancellation
+        // Handle graceful cancellation
         if (gracefulCancellationToken.IsCancellationRequested)
         {
             throw new OperationCanceledException(

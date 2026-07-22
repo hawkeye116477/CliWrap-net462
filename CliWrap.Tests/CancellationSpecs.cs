@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Text;
@@ -185,47 +184,46 @@ public class CancellationSpecs
     }
 
     [Fact(Timeout = 15000)]
-    public async Task I_can_execute_a_command_as_a_pull_based_event_stream_with_no_unobserved_exception()
+    public async Task I_can_execute_a_command_as_a_pull_based_event_stream_and_cancel_it_without_unobserved_exception()
     {
-        // Arrange
-        var unobservedExceptions = new ConcurrentBag<Exception>();
+        // https://github.com/Tyrrrz/CliWrap/issues/336
 
-        void OnUnobservedException(object? sender, UnobservedTaskExceptionEventArgs e)
+        // Arrange
+        var exception = default(Exception?);
+
+        void OnUnobservedException(object? sender, UnobservedTaskExceptionEventArgs args)
         {
-            unobservedExceptions.Add(e.Exception);
-            e.SetObserved();
+            Interlocked.CompareExchange(ref exception, args.Exception, null);
+            args.SetObserved();
         }
 
         TaskScheduler.UnobservedTaskException += OnUnobservedException;
 
-        var cmd = Cli.Wrap("dotnet").WithArguments(["--version"]);
+        var cmd = Cli.Wrap(Dummy.Program.FilePath).WithArguments(["sleep", "00:00:20"]);
 
         // Act
-        // Listening to a pull event stream followed by cancelling the listening, should no trigger any UnobservedTaskException
-        // Since the issue is a race condition, run the operation multiple times and concurently to maximize the chances of triggering it
         try
         {
+            // This is not a deterministic test, so run it multiple times to increase exposure to the race condition
             for (var i = 0; i < 50; i++)
             {
                 using var cts = new CancellationTokenSource();
 
-                await Task.Run(async () =>
+                try
                 {
-                    try
+                    await foreach (var _ in cmd.ListenAsync(cts.Token))
                     {
-                        await foreach (var _ in cmd.ListenAsync(cts.Token))
-                        {
-                            cts.Cancel();
-                        }
+                        await cts.CancelAsync();
                     }
-                    catch (OperationCanceledException) { }
-                });
+                }
+                catch (OperationCanceledException) { }
             }
+
+            await Task.Delay(500);
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
-            await Task.Delay(500);
         }
         finally
         {
@@ -233,7 +231,7 @@ public class CancellationSpecs
         }
 
         // Assert
-        unobservedExceptions.Should().BeEmpty();
+        Volatile.Read(ref exception).Should().BeNull();
     }
 
     [Fact(Timeout = 15000)]
