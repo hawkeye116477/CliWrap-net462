@@ -28,9 +28,12 @@ By using this project or its source code, for any purpose and in any shape or fo
 
 To learn more about the war and how you can help, [click here](https://tyrrrz.me/ukraine). Glory to Ukraine! 🇺🇦
 
-## Install original
-
-- 📦 [NuGet](https://nuget.org/packages/CliWrap): `dotnet add package CliWrap`
+## Install
+📦
+```
+nuget source Add -Name "Hawkeye Nougat Registry" -Source "https://gitlab.com/api/v4/projects/85661048/packages/nuget/index.json"
+nuget install CliWrap-net462 -Source "Hawkeye Nougat Registry"
+```
 
 ## Features
 
@@ -41,8 +44,8 @@ To learn more about the war and how you can help, [click here](https://tyrrrz.me
 - Graceful cancellation using interrupt signals
 - Designed with strict immutability in mind
 - Provides safety against typical deadlock scenarios
-- Tested on Windows, Linux, and macOS
-- Targets .NET Standard 2.0+, .NET Core 3.0+, .NET Framework 4.6.2+
+- Tested on Windows
+- Targets .NET Framework 4.6.2+
 - No external dependencies
 
 ## Usage
