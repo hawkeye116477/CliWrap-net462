@@ -1,0 +1,23 @@
+name: Publish as Nuget
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch: null
+  
+jobs:
+  package-and-publish:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Generate NuGet package
+        run: |
+          dotnet restore CliWrap/CliWrap.csproj
+          dotnet pack CliWrap/CliWrap.csproj --property:Configuration=Release --output NugetPackages
+      - name: Publish NuGet package
+        env:
+          NOUGAT_TOKEN: ${{ secrets.NOUGAT_TOKEN }}
+        run: |
+          nuget source Add -Name "HawkeyeNougatRegistry" -Source "https://gitlab.com/api/v4/projects/85661048/packages/nuget/index.json" -Username "HawkeyeNougatHelper" -Password "$env:NOUGAT_TOKEN"
+          nuget push NugetPackages\*.nupkg -Source "HawkeyeNougatRegistry"

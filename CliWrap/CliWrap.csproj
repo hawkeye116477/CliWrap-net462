@@ -65,5 +65,11 @@
   </ItemGroup>
   <PropertyGroup>
     <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)/..'))=Dev:/CliWrap</PathMap>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <Company>hawkeye116477</Company>
+    <PackageProjectUrl>https://github.com/hawkeye116477/CliWrap-net462</PackageProjectUrl>
+    <PackageReleaseNotes>https://github.com/hawkeye116477/CliWrap-net462/releases</PackageReleaseNotes>
+    <Authors>hawkeye116477</Authors>
+    <Description>Library for interacting with external command-line interfaces (forked from https://github.com/Tyrrrz/CliWrap)</Description>
   </PropertyGroup>
 </Project>
