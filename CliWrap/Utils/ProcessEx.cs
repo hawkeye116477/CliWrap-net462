@@ -4,7 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using CliWrap.Utils.Extensions;
+using CliWrap.Native;
+using PowerKit.Extensions;
 
 namespace CliWrap.Utils;
 
