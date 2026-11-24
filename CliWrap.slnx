@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Misc/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="License.txt" />
+    <File Path="Readme.md" />
+  </Folder>
+  <Project Path="CliWrap.Benchmarks/CliWrap.Benchmarks.csproj" />
+  <Project Path="CliWrap.Signaler/CliWrap.Signaler.csproj" />
+  <Project Path="CliWrap.Tests.Dummy/CliWrap.Tests.Dummy.csproj" />
+  <Project Path="CliWrap.Tests/CliWrap.Tests.csproj" />
+  <Project Path="CliWrap/CliWrap.csproj" />
+</Solution>

@@ -45,7 +45,7 @@
 
   <!-- Non-linking dependency on the signaler project to ensure correct build order -->
   <ItemGroup>
-    <ProjectReference Include="..\CliWrap.Signaler\CliWrap.Signaler.csproj">
+    <ProjectReference Include="../CliWrap.Signaler/CliWrap.Signaler.csproj">
       <GlobalPropertiesToRemove>TargetFramework</GlobalPropertiesToRemove>
       <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
       <CopyLocal>false</CopyLocal>
