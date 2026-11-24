@@ -5,4 +5,8 @@
     <TargetFramework>net35</TargetFramework>
   </PropertyGroup>
 
+ <ItemGroup>
+    <PackageReference Include="PolyShim" PrivateAssets="all" />
+  </ItemGroup>
+
 </Project>
