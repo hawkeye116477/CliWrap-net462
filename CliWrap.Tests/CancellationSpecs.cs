@@ -102,8 +102,8 @@ public class CancellationSpecs
         var cmd = Cli.Wrap(Dummy.Program.FilePath).WithArguments(["sleep", "00:00:20"]);
 
         // Act & assert
-        var ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(
-            async () => await cmd.ExecuteBufferedAsync(cts.Token)
+        var ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+            await cmd.ExecuteBufferedAsync(cts.Token)
         );
 
         ex.CancellationToken.Should().Be(cts.Token);
@@ -119,8 +119,8 @@ public class CancellationSpecs
         var cmd = Cli.Wrap(Dummy.Program.FilePath).WithArguments(["sleep", "00:00:20"]);
 
         // Act & assert
-        var ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(
-            async () => await cmd.ExecuteBufferedAsync(cts.Token)
+        var ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+            await cmd.ExecuteBufferedAsync(cts.Token)
         );
 
         ex.CancellationToken.Should().Be(cts.Token);
@@ -136,14 +136,13 @@ public class CancellationSpecs
         var cmd = Cli.Wrap(Dummy.Program.FilePath).WithArguments(["sleep", "00:00:20"]);
 
         // Act & assert
-        var ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(
-            async () =>
-                await cmd.ExecuteBufferedAsync(
-                    Encoding.Default,
-                    Encoding.Default,
-                    CancellationToken.None,
-                    cts.Token
-                )
+        var ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+            await cmd.ExecuteBufferedAsync(
+                Encoding.Default,
+                Encoding.Default,
+                CancellationToken.None,
+                cts.Token
+            )
         );
 
         ex.CancellationToken.Should().Be(cts.Token);
@@ -232,17 +231,16 @@ public class CancellationSpecs
         var cmd = Cli.Wrap(Dummy.Program.FilePath).WithArguments(["sleep", "00:00:20"]);
 
         // Act & assert
-        var ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(
-            async () =>
-                await cmd.Observe(cts.Token)
-                    .ForEachAsync(
-                        cmdEvent =>
-                        {
-                            if (cmdEvent is StandardOutputCommandEvent stdOutEvent)
-                                stdOutEvent.Text.Should().NotContain("Done.");
-                        },
-                        CancellationToken.None
-                    )
+        var ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+            await cmd.Observe(cts.Token)
+                .ForEachAsync(
+                    cmdEvent =>
+                    {
+                        if (cmdEvent is StandardOutputCommandEvent stdOutEvent)
+                            stdOutEvent.Text.Should().NotContain("Done.");
+                    },
+                    CancellationToken.None
+                )
         );
 
         ex.CancellationToken.Should().Be(cts.Token);
@@ -258,17 +256,16 @@ public class CancellationSpecs
         var cmd = Cli.Wrap(Dummy.Program.FilePath).WithArguments(["sleep", "00:00:20"]);
 
         // Act & assert
-        var ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(
-            async () =>
-                await cmd.Observe(cts.Token)
-                    .ForEachAsync(
-                        cmdEvent =>
-                        {
-                            if (cmdEvent is StandardOutputCommandEvent stdOutEvent)
-                                stdOutEvent.Text.Should().NotContain("Done.");
-                        },
-                        CancellationToken.None
-                    )
+        var ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+            await cmd.Observe(cts.Token)
+                .ForEachAsync(
+                    cmdEvent =>
+                    {
+                        if (cmdEvent is StandardOutputCommandEvent stdOutEvent)
+                            stdOutEvent.Text.Should().NotContain("Done.");
+                    },
+                    CancellationToken.None
+                )
         );
 
         ex.CancellationToken.Should().Be(cts.Token);
@@ -284,22 +281,16 @@ public class CancellationSpecs
         var cmd = Cli.Wrap(Dummy.Program.FilePath).WithArguments(["sleep", "00:00:20"]);
 
         // Act & assert
-        var ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(
-            async () =>
-                await cmd.Observe(
-                        Encoding.Default,
-                        Encoding.Default,
-                        CancellationToken.None,
-                        cts.Token
-                    )
-                    .ForEachAsync(
-                        cmdEvent =>
-                        {
-                            if (cmdEvent is StandardOutputCommandEvent stdOutEvent)
-                                stdOutEvent.Text.Should().NotContain("Done.");
-                        },
-                        CancellationToken.None
-                    )
+        var ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+            await cmd.Observe(Encoding.Default, Encoding.Default, CancellationToken.None, cts.Token)
+                .ForEachAsync(
+                    cmdEvent =>
+                    {
+                        if (cmdEvent is StandardOutputCommandEvent stdOutEvent)
+                            stdOutEvent.Text.Should().NotContain("Done.");
+                    },
+                    CancellationToken.None
+                )
         );
 
         ex.CancellationToken.Should().Be(cts.Token);
