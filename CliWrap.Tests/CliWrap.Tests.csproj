@@ -13,7 +13,7 @@
     <PackageReference Include="CliFx" />
     <PackageReference Include="coverlet.collector" PrivateAssets="all" />
     <PackageReference Include="FluentAssertions" />
-    <PackageReference Include="GitHubActionsTestLogger" PrivateAssets="all" />
+    <PackageReference Include="GitHubActionsTestLogger" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="PolyShim" PrivateAssets="all" />
