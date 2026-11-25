@@ -86,7 +86,10 @@ internal partial class SimplexStream : Stream
         );
 
         var length = Math.Min(buffer.Length, _bufferWritten - _bufferRead);
-        _buffer.Memory.Slice(_bufferRead, length).CopyTo(buffer);
+        if (_buffer != null)
+        {
+            _buffer.Memory.Slice(_bufferRead, length).CopyTo(buffer);
+        }
         _bufferRead += length;
 
         // Release the write lock if the consumer has finished reading all of
