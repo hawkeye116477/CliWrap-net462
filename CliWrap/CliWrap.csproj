@@ -2,8 +2,6 @@
 
   <PropertyGroup>
     <IsPackable>true</IsPackable>
-    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
-    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
     <AssemblyName>CliWrap-net462</AssemblyName>
     <TargetFramework>net462</TargetFramework>
   </PropertyGroup>
@@ -25,11 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Condition="'$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'net462'" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" Condition="'$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'net462'" />
-    <PackageReference Include="System.Management" Condition="'$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netstandard2.1'" />
-    <PackageReference Include="System.Memory" Condition="'$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'net462'" />
+    <PackageReference Include="System.Threading.Tasks.Extensions"/>
+    <PackageReference Include="System.Memory" />
     <PackageReference Include="System.ValueTuple" />
   </ItemGroup>
 
