@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using PowerKit.Extensions;
+using CliWrap.PowerKit.Extensions;
 
 namespace CliWrap.Builders;
 

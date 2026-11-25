@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using PowerKit.Extensions;
+using CliWrap.PowerKit.Extensions;
 
 namespace CliWrap.Native;
 

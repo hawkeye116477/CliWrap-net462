@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CliWrap.Utils;
-using PowerKit.Extensions;
+using CliWrap.PowerKit.Extensions;
 
 namespace CliWrap;
 
