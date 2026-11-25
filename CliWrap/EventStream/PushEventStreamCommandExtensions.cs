@@ -3,7 +3,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CliWrap.PowerKit;
-using CliWrap.Utils.Extensions;
+using CliWrap.PowerKit.Extensions;
 
 namespace CliWrap.EventStream;
 

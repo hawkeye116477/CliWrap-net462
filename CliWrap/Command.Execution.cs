@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -9,7 +8,6 @@ using System.Threading.Tasks;
 using CliWrap.Exceptions;
 using CliWrap.PowerKit.Extensions;
 using CliWrap.Utils;
-using CliWrap.Utils.Extensions;
 
 namespace CliWrap;
 

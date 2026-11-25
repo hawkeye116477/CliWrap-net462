@@ -4,8 +4,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CliWrap.PowerKit.Extensions;
 using CliWrap.Utils;
-using CliWrap.Utils.Extensions;
 
 namespace CliWrap.EventStream;
 
