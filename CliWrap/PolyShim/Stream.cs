@@ -1,0 +1,90 @@
+﻿#pragma warning disable CS0436
+
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using System.Threading;
+
+internal static class MemberPolyfills_NetCore21_Stream
+{
+    extension(Stream stream)
+    {
+        // Task infrastructure is required for async method support
+        // https://learn.microsoft.com/dotnet/api/system.io.stream.copytoasync#system-io-stream-copytoasync(system-io-stream-system-threading-cancellationtoken)
+        public async Task CopyToAsync(
+            Stream destination,
+            CancellationToken cancellationToken = default
+        ) => await stream.CopyToAsync(destination, 81920, cancellationToken).ConfigureAwait(false);
+
+        // https://learn.microsoft.com/dotnet/api/system.io.stream.read#system-io-stream-read(system-span((system-byte)))
+        public int Read(Span<byte> buffer)
+        {
+            var bufferArray = buffer.ToArray();
+            var result = stream.Read(bufferArray, 0, bufferArray.Length);
+            bufferArray.CopyTo(buffer);
+
+            return result;
+        }
+
+        // https://learn.microsoft.com/dotnet/api/system.io.stream.write#system-io-stream-write(system-readonlyspan((system-byte)))
+        public void Write(ReadOnlySpan<byte> buffer)
+        {
+            var bufferArray = buffer.ToArray();
+            stream.Write(bufferArray, 0, bufferArray.Length);
+        }
+
+        // Task infrastructure is required for async method support
+        // https://learn.microsoft.com/dotnet/api/system.io.stream.readasync#system-io-stream-readasync(system-memory((system-byte))-system-threading-cancellationtoken)
+        public async ValueTask<int> ReadAsync(
+            Memory<byte> buffer,
+            CancellationToken cancellationToken = default
+        )
+        {
+            var bufferArray = buffer.ToArray();
+            var result = await stream
+                .ReadAsync(bufferArray, 0, bufferArray.Length, cancellationToken)
+                .ConfigureAwait(false);
+
+            bufferArray.CopyTo(buffer);
+
+            return result;
+        }
+
+        // https://learn.microsoft.com/dotnet/api/system.io.stream.writeasync#system-io-stream-writeasync(system-readonlymemory((system-byte))-system-threading-cancellationtoken)
+        public async ValueTask WriteAsync(
+            ReadOnlyMemory<byte> buffer,
+            CancellationToken cancellationToken = default
+        )
+        {
+            var bufferArray = buffer.ToArray();
+            await stream
+                .WriteAsync(bufferArray, 0, bufferArray.Length, cancellationToken)
+                .ConfigureAwait(false);
+        }
+    }
+}
+internal static class MemberPolyfills_NetCore30_Stream
+{
+    extension(Stream stream)
+    {
+        // Task infrastructure is required for async method support
+        // https://learn.microsoft.com/dotnet/api/system.io.stream.disposeasync
+        public async ValueTask DisposeAsync()
+        {
+            if (stream is IAsyncDisposable asyncDisposable)
+            {
+                await asyncDisposable.DisposeAsync();
+                return;
+            }
+
+            try
+            {
+                await stream.FlushAsync();
+            }
+            finally
+            {
+                stream.Dispose();
+            }
+        }
+    }
+}

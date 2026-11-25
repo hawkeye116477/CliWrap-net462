@@ -12,7 +12,7 @@
     <!-- Disable trim and AOT analyzers on older frameworks as they're not compatible with newer language features -->
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
     <EnableAotAnalyzer>false</EnableAotAnalyzer>
-    <LangVersion>12.0</LangVersion>
+    <LangVersion>14.0</LangVersion>
   </PropertyGroup>
 
   <!-- Disable nullability warnings on older frameworks because there is no nullability info for BCL -->

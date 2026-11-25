@@ -1,0 +1,52 @@
+﻿using System;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
+
+internal static class MemberPolyfills_Net50_OperatingSystem
+{
+    extension(OperatingSystem)
+    {
+        // Can only detect the platform on .NET Standard 1.3+
+#if !NETSTANDARD || NETSTANDARD1_3_OR_GREATER
+        // https://learn.microsoft.com/dotnet/api/system.operatingsystem.isfreebsd
+        [SupportedOSPlatformGuard("freebsd")]
+        public static bool IsFreeBSD() => RuntimeInformation.IsOSPlatform(OSPlatform.Create("FreeBSD"));
+
+        // https://learn.microsoft.com/dotnet/api/system.operatingsystem.islinux
+        [SupportedOSPlatformGuard("linux")]
+        public static bool IsLinux() => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+
+        // https://learn.microsoft.com/dotnet/api/system.operatingsystem.ismacos
+        [SupportedOSPlatformGuard("macos")]
+        public static bool IsMacOS() => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+
+        // https://learn.microsoft.com/dotnet/api/system.operatingsystem.iswindows
+        [SupportedOSPlatformGuard("windows")]
+        public static bool IsWindows() => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+        // Can only detect OS version on .NET Standard 2.0+ and .NET Core 2.0
+#if (!NETSTANDARD || NETSTANDARD2_0_OR_GREATER) && (!NETCOREAPP || NETCOREAPP2_0_OR_GREATER)
+        // https://learn.microsoft.com/dotnet/api/system.operatingsystem.iswindowsversionatleast
+        [SupportedOSPlatformGuard("windows")]
+        public static bool IsWindowsVersionAtLeast(int major, int minor = 0, int build = 0, int revision = 0)
+        {
+            if (!IsWindows())
+                return false;
+
+            var version = Environment.OSVersion.Version;
+
+            if (version.Major != major)
+                return version.Major > major;
+
+            if (version.Minor != minor)
+                return version.Minor > minor;
+
+            if (version.Build != build)
+                return version.Build > build;
+
+            return version.Revision >= revision;
+        }
+#endif
+#endif
+    }
+}

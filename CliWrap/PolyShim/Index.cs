@@ -1,0 +1,54 @@
+﻿#pragma warning disable CS0436
+
+using System.Diagnostics.CodeAnalysis;
+
+namespace System;
+
+// https://learn.microsoft.com/dotnet/api/system.index
+internal readonly struct Index(int value) : IEquatable<Index>
+{
+    private readonly int _value = value;
+
+    public Index(int value, bool fromEnd = false)
+        : this(fromEnd ? ~value : value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+    }
+
+    public int Value => _value < 0 ? ~_value : _value;
+
+    public bool IsFromEnd => _value < 0;
+
+    public int GetOffset(int length)
+    {
+        var offset = _value;
+        if (IsFromEnd)
+            offset += length + 1;
+
+        return offset;
+    }
+
+    public override bool Equals(object? value) => value is Index index && _value == index._value;
+
+    public bool Equals(Index other) => _value == other._value;
+
+    public override int GetHashCode() => _value;
+
+    public override string ToString()
+    {
+        if (IsFromEnd)
+            return "^" + (uint)Value;
+
+        return ((uint)Value).ToString();
+    }
+
+    public static Index Start => new(0);
+
+    public static Index End => new(~0);
+
+    public static Index FromStart(int value) => new(value, false);
+
+    public static Index FromEnd(int value) => new(value, true);
+
+    public static implicit operator Index(int value) => FromStart(value);
+}

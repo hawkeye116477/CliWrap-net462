@@ -1,0 +1,18 @@
+﻿namespace System.Runtime.Versioning;
+
+// https://learn.microsoft.com/dotnet/api/system.runtime.versioning.supportedosplatformguardattribute
+[AttributeUsage(
+    AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Property,
+    AllowMultiple = true,
+    Inherited = false
+)]
+internal class SupportedOSPlatformGuardAttribute(string platformName)
+    // OSPlatformAttribute's constructor is not accessible where that type is natively defined
+#if !(NETCOREAPP && NET5_0_OR_GREATER)
+    : OSPlatformAttribute(platformName);
+#else
+    : Attribute
+{
+    public string PlatformName { get; } = platformName;
+}
+#endif
