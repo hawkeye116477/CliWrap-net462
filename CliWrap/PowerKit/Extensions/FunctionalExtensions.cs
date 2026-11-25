@@ -1,10 +1,19 @@
-﻿namespace CliWrap.PowerKit.Extensions;
+﻿using System;
+
+namespace CliWrap.PowerKit.Extensions;
 
 /// <summary>
 /// Extensions for functional programming concepts and patterns.
 /// </summary>
 internal static class FunctionalExtensions
 {
+    extension<TIn>(TIn input)
+    {
+        /// <summary>
+        /// Passes the value through the specified transform function and returns the result.
+        /// </summary>
+        public TOut Pipe<TOut>(Func<TIn, TOut> transform) => transform(input);
+    }
     extension(string value)
     {
 
